@@ -2,6 +2,8 @@ import logging
 import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
+import os
+from dotenv import load_dotenv
 
 # Enable logging
 logging.basicConfig(
@@ -9,9 +11,11 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# Define API token and admin ID
-TOKEN = '7462030528:AAEg_uOsrQedNM-fa_T_m2q3Sqhv2u06n90'
-ADMIN_ID = 7130438750
+# Load environment variables
+load_dotenv('bot.env')
+
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+ADMIN_ID = os.getenv("ADMIN_ID")
 
 # File storage
 FILE_STORAGE = "files.json"
