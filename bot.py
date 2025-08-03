@@ -1,9 +1,32 @@
 import logging
 import json
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
-import os
 from dotenv import load_dotenv
+
+# ----------- START: UPTIMEROBOT KEEP-ALIVE SERVER -----------
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"Bot is alive!")
+
+def run_keep_alive_server():
+    server = HTTPServer(('0.0.0.0', 8080), SimpleHandler)
+    server.serve_forever()
+
+def keep_alive():
+    thread = threading.Thread(target=run_keep_alive_server)
+    thread.daemon = True
+    thread.start()
+
+# ----------- END: UPTIMEROBOT KEEP-ALIVE SERVER -----------
 
 # Enable logging
 logging.basicConfig(
@@ -53,7 +76,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def upload_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        if update.effective_user.id == ADMIN_ID:
+        if str(update.effective_user.id) == ADMIN_ID:
             if update.message.document:
                 file = await context.bot.get_file(update.message.document)
                 files[update.message.document.file_name] = file.file_id
@@ -118,21 +141,22 @@ async def suggest(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Email: emmycodezstudio@gmail.com\n"
             "Whatsapp: +2349019029931\n")
     except Exception as e:
-        logging.error(f"Error in start command: {e}")
+        logging.error(f"Error in suggest command: {e}")
 
 async def support(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         await update.message.reply_text(
-                "Support The Development of this Project and more... 😊 !\n"
+            "Support The Development of this Project and more... 😊 !\n"
             "Bank Name: Palmpay\n"
             "Account no.: 9037411860\n"
             "Account Name: Emmanuel Abuh\n"
             "\nThank you For Your Support 😊\n")
     except Exception as e:
-        logging.error(f"Error in start command: {e}")
+        logging.error(f"Error in support command: {e}")
 
 def main():
     try:
+        keep_alive()  # <-- Start the background web server
         application = ApplicationBuilder().token(TOKEN).build()
 
         application.add_handler(CommandHandler("start", start))
