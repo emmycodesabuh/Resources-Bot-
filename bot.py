@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 
 # Load environment variables
-load_dotenv('bot.env')
+# load_dotenv('bot.env')
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")
